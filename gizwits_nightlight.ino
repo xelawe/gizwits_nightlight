@@ -20,7 +20,7 @@
 #define pirpin 14
 
 #define lightpin1 16
-#define lightpin1 5
+#define lightpin2 5
 
 int LDRValue;
 //int led_stat = 0;
@@ -108,7 +108,7 @@ void setup() {
   pinMode(ledpinbl, OUTPUT);
   pinMode(lightpin1, OUTPUT);
   pinMode(lightpin2, OUTPUT);
-  
+
   set_rgb(255, 255, 255);
 
   wifi_init("NightLight");
@@ -176,8 +176,9 @@ void loop() {
     digitalWrite(lightpin2, HIGH);
   } else {
     analogWrite(ledpinbl, 0);
-    digitalWrite(lightpin1, LOW);  }
-    digitalWrite(lightpin2, LOW);  }
+    digitalWrite(lightpin1, LOW);
+    digitalWrite(lightpin2, LOW);
+  }
 
   delay(100);
 
