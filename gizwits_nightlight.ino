@@ -23,7 +23,7 @@
 #define lightpin2 5
 
 int LDRValue;
-//int led_stat = 0;
+#define LDRThres 30
 
 boolean gv_PIR_on = false;
 
@@ -90,9 +90,11 @@ void IntBtn() {
 }
 
 void IntPIR() {
-  ticker_piroff.detach();
-  gv_PIR_on = true;
-  ticker_piroff.attach(10, piroff);
+  if ( LDRValue < LDRThres ) {
+    ticker_piroff.detach();
+    gv_PIR_on = true;
+    ticker_piroff.attach(10, piroff);
+  }
 }
 
 void setup() {
@@ -169,6 +171,12 @@ void loop() {
     analogWrite(ledpinrt, 0);
   }
 
+
+  if ( LDRValue < LDRThres ) {
+    analogWrite(ledpingn, 100);
+  } else {
+    analogWrite(ledpingn, 0);
+  }
 
   if (gv_PIR_on) {
     analogWrite(ledpinbl, 255);
