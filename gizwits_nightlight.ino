@@ -23,7 +23,10 @@
 #define lightpin2 5
 
 int LDRValue;
-#define LDRThres 30
+
+// Parameter for Timing, ...
+#define LDRThres 10
+#define OnTimeLED 25
 
 boolean gv_PIR_on = false;
 
@@ -93,7 +96,7 @@ void IntPIR() {
   if ( LDRValue < LDRThres ) {
     ticker_piroff.detach();
     gv_PIR_on = true;
-    ticker_piroff.attach(10, piroff);
+    ticker_piroff.attach(OnTimeLED, piroff);
   }
 }
 
@@ -166,14 +169,14 @@ void loop() {
 
   int pirState = digitalRead(pirpin);
   if (pirState == 1) {
-    analogWrite(ledpinrt, 255);
+    analogWrite(ledpinrt, 50);
   } else {
     analogWrite(ledpinrt, 0);
   }
 
 
   if ( LDRValue < LDRThres ) {
-    analogWrite(ledpingn, 100);
+    analogWrite(ledpingn, 50);
   } else {
     analogWrite(ledpingn, 0);
   }
