@@ -22,14 +22,12 @@
 #define lightpin1 16
 #define lightpin2 5
 
-// Light On Time in s
-#define LightOnTime 20
-
 int LDRValue;
 
 // Parameter for Timing, ...
-#define LDRThres 10
-#define OnTimeLED 25
+#define LDRThres 5
+// Light On Time in s
+#define OnTimeLight 25
 
 boolean gv_PIR_on = false;
 
@@ -99,11 +97,7 @@ void IntPIR() {
   if ( LDRValue < LDRThres ) {
     ticker_piroff.detach();
     gv_PIR_on = true;
-<<<<<<< HEAD
-    ticker_piroff.attach(OnTimeLED, piroff);
-=======
-    ticker_piroff.attach(LightOnTime, piroff);
->>>>>>> origin/master
+    ticker_piroff.attach(OnTimeLight, piroff);
   }
 }
 
