@@ -137,49 +137,8 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
 
   check_ota();
-
-
-  int pirState = digitalRead(pirpin);
-
-  if (gv_PIR_on) {
-    analogWrite(ledpinbl, 255);
-    digitalWrite(lightpin1, HIGH);
-    digitalWrite(lightpin2, HIGH);
-    gv_light_on = true;
-  } else {
-    analogWrite(ledpinbl, 0);
-    digitalWrite(lightpin1, LOW);
-    digitalWrite(lightpin2, LOW);
-    gv_light_on = false;
-  }
-
-  if ( !gv_light_on ) {
-
-    // Lights off: measure LDR
-    // so turn off all LEDs
-    analogWrite(ledpingn, 0);
-    analogWrite(ledpinrt, 0);
-    analogWrite(ledpinbl, 0);
-    delay(100);
-
-    // now measure LDR
-    LDRValue = analogRead(LDRPin);
-
-    // show result of measurement
-    if ( LDRValue < LDRThres ) {
-      analogWrite(ledpingn, 50);
-    }
-  }
-
-
-  if (pirState == 1) {
-    analogWrite(ledpinrt, 50);
-  } else {
-    analogWrite(ledpinrt, 0);
-  }
 
   switch (cmd) {
     case CMD_WAIT:
@@ -207,12 +166,43 @@ void loop() {
       break;
   }
 
+  if ( !gv_light_on ) {
 
+    // Lights off: measure LDR
+    // so turn off all LEDs
+    analogWrite(ledpingn, 0);
+    analogWrite(ledpinrt, 0);
+    analogWrite(ledpinbl, 0);
+    delay(100);
 
+    // now measure LDR
+    LDRValue = analogRead(LDRPin);
 
+    // show result of measurement
+    if ( LDRValue < LDRThres ) {
+      analogWrite(ledpingn, 50);
+    }
+  }
 
+  int pirState = digitalRead(pirpin);
 
+  if (pirState == 1) {
+    analogWrite(ledpinrt, 50);
+  } else {
+    analogWrite(ledpinrt, 0);
+  }
 
+  if (gv_PIR_on) {
+    analogWrite(ledpinbl, 255);
+    digitalWrite(lightpin1, HIGH);
+    digitalWrite(lightpin2, HIGH);
+    gv_light_on = true;
+  } else {
+    analogWrite(ledpinbl, 0);
+    digitalWrite(lightpin1, LOW);
+    digitalWrite(lightpin2, LOW);
+    gv_light_on = false;
+  }
 
   delay(100);
 
