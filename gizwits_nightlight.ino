@@ -7,8 +7,8 @@
 #define DebugPrintln(...) { }
 #endif
 
-#include "tools_wifi.h"
-#include "ota_tool.h"
+#include "cy_wifi.h"
+#include "cy_ota.h"
 #include <Ticker.h>
 
 #define btnpin 4
@@ -113,6 +113,7 @@ void setup() {
   pinMode(ledpinrt, OUTPUT);
   pinMode(ledpingn, OUTPUT);
   pinMode(ledpinbl, OUTPUT);
+  
   pinMode(lightpin1, OUTPUT);
   pinMode(lightpin2, OUTPUT);
 
@@ -201,6 +202,7 @@ void loop() {
       digitalWrite(lightpin2, HIGH);
       gv_light_on = true;
     }
+
   } else {
     analogWrite(ledpinbl, 0);
     digitalWrite(lightpin1, LOW);
