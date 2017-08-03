@@ -22,13 +22,13 @@
 #define lightpin1 16
 #define lightpin2 5
 
-int LDRValue;
-
 // Parameter for Timing, ...
 #define LDRThres 5
 // Light On Time in s
 #define OnTimeLight 25
 
+int LDRValue;
+volatile boolean gv_PIR_Int;
 boolean gv_PIR_on = false;
 boolean gv_light_on = false;
 
@@ -95,10 +95,7 @@ void IntBtn() {
 }
 
 void IntPIR() {
-
-  ticker_piroff.detach();
-  gv_PIR_on = true;
-  ticker_piroff.attach(OnTimeLight, piroff);
+  gv_PIR_Int = true;
 
 }
 
@@ -113,7 +110,7 @@ void setup() {
   pinMode(ledpinrt, OUTPUT);
   pinMode(ledpingn, OUTPUT);
   pinMode(ledpinbl, OUTPUT);
-  
+
   pinMode(lightpin1, OUTPUT);
   pinMode(lightpin2, OUTPUT);
 
@@ -140,6 +137,13 @@ void setup() {
 void loop() {
 
   check_ota();
+
+  if ( gv_PIR_Int == true ) {
+    ticker_piroff.detach();
+    gv_PIR_on = true;
+    ticker_piroff.attach(OnTimeLight, piroff);
+    gv_PIR_Int = false;
+  }
 
   switch (cmd) {
     case CMD_WAIT:
