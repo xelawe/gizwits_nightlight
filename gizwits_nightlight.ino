@@ -138,6 +138,7 @@ void loop() {
 
   check_ota();
 
+  // Interrupt on PIR occured?
   if ( gv_PIR_Int == true ) {
     ticker_piroff.detach();
     gv_PIR_on = true;
@@ -185,7 +186,7 @@ void loop() {
 
     // show result of measurement
     if ( LDRValue < LDRThres ) {
-      analogWrite(ledpingn, 50);
+      //analogWrite(ledpingn, 10);
     }
   }
 
