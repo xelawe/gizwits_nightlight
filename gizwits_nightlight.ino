@@ -1,11 +1,5 @@
-#define serdebug
-#ifdef serdebug
-#define DebugPrint(...) {  Serial.print(__VA_ARGS__); }
-#define DebugPrintln(...) {  Serial.println(__VA_ARGS__); }
-#else
-#define DebugPrint(...) { }
-#define DebugPrintln(...) { }
-#endif
+#include <cy_serdebug.h>
+#include <cy_serial.h>
 
 #include "cy_wifi.h"
 #include "cy_ota.h"
@@ -38,9 +32,16 @@ int cmd = CMD_WAIT;
 int buttonState = HIGH;
 static long startPress = 0;
 
+const char *gc_hostname = "Nightlight";
+String clientName;
+char *gv_clientname;
+
 Ticker ticker_piroff;
 
 void set_rgb(int iv_red, int iv_green, int iv_blue, int iv_LDRvalue) {
+
+
+
 
   int lv_green = iv_green * iv_LDRvalue / 1023;
   int lv_red = iv_red * iv_LDRvalue / 1023;
@@ -52,9 +53,9 @@ void set_rgb(int iv_red, int iv_green, int iv_blue, int iv_LDRvalue) {
 
 void set_rgb(int iv_red, int iv_green, int iv_blue) {
 
-  int lv_green = iv_green * 0.8;
-  int lv_red = iv_red;
-  int lv_blue = iv_blue;
+  int lv_green = map(iv_green,0,255,0,1023) * 0.8;
+  int lv_red = map(iv_red,0,255,0,1023);
+  int lv_blue = map(iv_blue,0,255,0,1023);
 
   analogWrite(ledpinrt, lv_red);
   analogWrite(ledpingn, lv_green);
@@ -99,13 +100,35 @@ void IntPIR() {
 
 }
 
+String macToStr(const uint8_t* mac)
+{
+  String result;
+  for (int i = 0; i < 6; ++i) {
+    if (mac[i] < 0x10 ){
+          result += '0';
+    }
+    result += String(mac[i], 16);
+    //if (i < 5)
+    //  result += ':';
+  }
+  return result;
+}
+
+void get_clientname() {
+  // Generate hostname based on MAC address
+
+  clientName += gc_hostname;
+  uint8_t mac[6];
+  WiFi.macAddress(mac);
+  clientName += macToStr(mac);
+
+  gv_clientname = (char*) clientName.c_str();
+}
+
 void setup() {
   // put your setup code here, to run once:
 
-#ifdef serdebug
-  Serial.begin(115200);
-#endif
-
+  cy_serial::start(__FILE__);
 
   pinMode(ledpinrt, OUTPUT);
   pinMode(ledpingn, OUTPUT);
@@ -116,9 +139,12 @@ void setup() {
 
   set_rgb(255, 255, 255);
 
-  wifi_init("NightLight");
+  get_clientname();
+  DebugPrint("clientname: ");
+  DebugPrintln(gv_clientname);
+  wifi_init(gv_clientname);
 
-  init_ota("NightLight");
+  init_ota(gv_clientname);
 
   set_rgb(0, 0, 0);
 
