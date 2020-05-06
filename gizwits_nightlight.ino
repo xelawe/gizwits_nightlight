@@ -1,7 +1,7 @@
 #include <cy_serdebug.h>
 #include <cy_serial.h>
 
-const char *gc_hostname = "giznightl";
+const char *gc_hostname = "Nightlight";
 #include "cy_wifi.h"
 #include "cy_ota.h"
 #include <Ticker.h>
@@ -35,9 +35,8 @@ int cmd = CMD_WAIT;
 int buttonState = HIGH;
 static long startPress = 0;
 
-const char *gc_hostname = "Nightlight";
-String clientName;
-char *gv_clientname;
+
+
 
 Ticker ticker_piroff;
 
@@ -91,30 +90,30 @@ void IntPIR() {
 
 }
 
-String macToStr(const uint8_t* mac)
-{
-  String result;
-  for (int i = 0; i < 6; ++i) {
-    if (mac[i] < 0x10 ) {
-      result += '0';
-    }
-    result += String(mac[i], 16);
-    //if (i < 5)
-    //  result += ':';
-  }
-  return result;
-}
-
-void get_clientname() {
-  // Generate hostname based on MAC address
-
-  clientName += gc_hostname;
-  uint8_t mac[6];
-  WiFi.macAddress(mac);
-  clientName += macToStr(mac);
-
-  gv_clientname = (char*) clientName.c_str();
-}
+//String macToStr(const uint8_t* mac)
+//{
+//  String result;
+//  for (int i = 0; i < 6; ++i) {
+//    if (mac[i] < 0x10 ) {
+//      result += '0';
+//    }
+//    result += String(mac[i], 16);
+//    //if (i < 5)
+//    //  result += ':';
+//  }
+//  return result;
+//}
+//
+//void get_clientname() {
+//  // Generate hostname based on MAC address
+//
+//  clientName += gc_hostname;
+//  uint8_t mac[6];
+//  WiFi.macAddress(mac);
+//  clientName += macToStr(mac);
+//
+//  gv_clientname = (char*) clientName.c_str();
+//}
 
 void setup() {
   // put your setup code here, to run once:
@@ -130,12 +129,11 @@ void setup() {
 
   set_rgb(255, 255, 255);
 
-  get_clientname();
-  DebugPrint("clientname: ");
-  DebugPrintln(gv_clientname);
   wifi_init(gv_clientname);
 
   init_ota(gv_clientname);
+
+  init_mqtt_local();
 
   set_rgb(0, 0, 0);
 
@@ -154,6 +152,12 @@ void setup() {
 void loop() {
 
   check_ota();
+
+  check_mqtt();
+  if ( gv_mqtt_conn_ok != true ) {
+    ESP.restart();
+    delay(2000);
+  }
 
   // Interrupt on PIR occured?
   if ( gv_PIR_Int == true ) {
@@ -222,14 +226,22 @@ void loop() {
       analogWrite(ledpinbl, 255);
       digitalWrite(lightpin1, HIGH);
       digitalWrite(lightpin2, HIGH);
-      gv_light_on = true;
+      if ( !gv_light_on ) {
+        gv_light_on = true;
+        gv_power = "ON";
+        void pub_power();
+      }
     }
 
   } else {
     analogWrite(ledpinbl, 0);
     digitalWrite(lightpin1, LOW);
     digitalWrite(lightpin2, LOW);
-    gv_light_on = false;
+    if ( gv_light_on ) {
+      gv_light_on = false;
+      gv_power = "OFF";
+      void pub_power();
+    }
   }
 
   delay(100);
