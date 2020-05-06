@@ -1,9 +1,12 @@
 #include <cy_serdebug.h>
 #include <cy_serial.h>
 
+const char *gc_hostname = "giznightl";
 #include "cy_wifi.h"
 #include "cy_ota.h"
 #include <Ticker.h>
+
+#include "mqtt_tool.h"
 
 #define btnpin 4
 #define ledpinbl 13
@@ -38,24 +41,12 @@ char *gv_clientname;
 
 Ticker ticker_piroff;
 
-void set_rgb(int iv_red, int iv_green, int iv_blue, int iv_LDRvalue) {
-
-
-
-
-  int lv_green = iv_green * iv_LDRvalue / 1023;
-  int lv_red = iv_red * iv_LDRvalue / 1023;
-  int lv_blue = iv_blue * iv_LDRvalue / 1023;
-
-  set_rgb(lv_red, lv_green, lv_blue);
-
-}
 
 void set_rgb(int iv_red, int iv_green, int iv_blue) {
 
-  int lv_green = map(iv_green,0,255,0,1023) * 0.8;
-  int lv_red = map(iv_red,0,255,0,1023);
-  int lv_blue = map(iv_blue,0,255,0,1023);
+  int lv_green = map(iv_green, 0, 255, 0, PWMRANGE) * 0.8;
+  int lv_red = map(iv_red, 0, 255, 0, PWMRANGE);
+  int lv_blue = map(iv_blue, 0, 255, 0, PWMRANGE);
 
   analogWrite(ledpinrt, lv_red);
   analogWrite(ledpingn, lv_green);
@@ -104,8 +95,8 @@ String macToStr(const uint8_t* mac)
 {
   String result;
   for (int i = 0; i < 6; ++i) {
-    if (mac[i] < 0x10 ){
-          result += '0';
+    if (mac[i] < 0x10 ) {
+      result += '0';
     }
     result += String(mac[i], 16);
     //if (i < 5)
@@ -212,7 +203,7 @@ void loop() {
 
     // show result of measurement
     if ( LDRValue < LDRThres ) {
-      //analogWrite(ledpingn, 10);
+      analogWrite(ledpingn, 10);
     }
   }
 
