@@ -31,7 +31,7 @@ boolean gv_light_on = false;
 
 const int CMD_WAIT = 0;
 const int CMD_BUTTON_CHANGE = 1;
-int cmd = CMD_WAIT;
+volatile int cmd = CMD_WAIT;
 int buttonState = HIGH;
 static long startPress = 0;
 
@@ -81,39 +81,15 @@ void reset() {
 }
 
 
-void IntBtn() {
+void ICACHE_RAM_ATTR IntBtn() {
   cmd = CMD_BUTTON_CHANGE;
 }
 
-void IntPIR() {
+void ICACHE_RAM_ATTR IntPIR() {
   gv_PIR_Int = true;
 
 }
 
-//String macToStr(const uint8_t* mac)
-//{
-//  String result;
-//  for (int i = 0; i < 6; ++i) {
-//    if (mac[i] < 0x10 ) {
-//      result += '0';
-//    }
-//    result += String(mac[i], 16);
-//    //if (i < 5)
-//    //  result += ':';
-//  }
-//  return result;
-//}
-//
-//void get_clientname() {
-//  // Generate hostname based on MAC address
-//
-//  clientName += gc_hostname;
-//  uint8_t mac[6];
-//  WiFi.macAddress(mac);
-//  clientName += macToStr(mac);
-//
-//  gv_clientname = (char*) clientName.c_str();
-//}
 
 void setup() {
   // put your setup code here, to run once:
@@ -129,7 +105,7 @@ void setup() {
 
   set_rgb(255, 255, 255);
 
-  wifi_init(gv_clientname);
+  wifi_init(gc_hostname);
 
   init_ota(gv_clientname);
 
@@ -141,23 +117,20 @@ void setup() {
   pinMode(btnpin, INPUT);
   attachInterrupt(btnpin, IntBtn, CHANGE);
 
-  //
+
   pinMode(pirpin, INPUT);
   attachInterrupt(pirpin, IntPIR, RISING);
 
   delay(500);
 
+  DebugPrintln("Setup init done!");
 }
 
 void loop() {
 
   check_ota();
 
-  check_mqtt();
-  if ( gv_mqtt_conn_ok != true ) {
-    ESP.restart();
-    delay(2000);
-  }
+  check_mqtt_reset();
 
   // Interrupt on PIR occured?
   if ( gv_PIR_Int == true ) {
@@ -229,7 +202,7 @@ void loop() {
       if ( !gv_light_on ) {
         gv_light_on = true;
         gv_power = "ON";
-        void pub_power();
+        pub_power();
       }
     }
 
@@ -240,7 +213,7 @@ void loop() {
     if ( gv_light_on ) {
       gv_light_on = false;
       gv_power = "OFF";
-      void pub_power();
+      pub_power();
     }
   }
 
