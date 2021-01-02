@@ -26,8 +26,9 @@ const char *gc_hostname = "Nightlight";
 
 int LDRValue;
 volatile boolean gv_PIR_Int;
+volatile boolean  gv_ldr_ok = false;
 boolean gv_PIR_on = false;
-boolean gv_light_on = false;
+volatile boolean gv_light_on = false;
 
 const int CMD_WAIT = 0;
 const int CMD_BUTTON_CHANGE = 1;
@@ -87,6 +88,15 @@ void ICACHE_RAM_ATTR IntBtn() {
 
 void ICACHE_RAM_ATTR IntPIR() {
   gv_PIR_Int = true;
+
+  if (  gv_ldr_ok == true ) {
+    // --> Turn On Light
+    digitalWrite(lightpin1, HIGH);
+    digitalWrite(lightpin2, HIGH);
+    if ( !gv_light_on ) {
+      gv_light_on = true;
+    }
+  }
 
 }
 
@@ -179,8 +189,11 @@ void loop() {
     LDRValue = analogRead(LDRPin);
 
     // show result of measurement
-    if ( LDRValue < LDRThres ) {
+    if (( LDRValue < LDRThres ) or gv_light_on ) {
+      gv_ldr_ok = true;
       analogWrite(ledpingn, 10);
+    } else {
+      gv_ldr_ok = false;
     }
   }
 
@@ -194,7 +207,7 @@ void loop() {
 
   if (gv_PIR_on) {
     // PIR trigged, is LDR OK?
-    if ( LDRValue < LDRThres ) {
+    if (  gv_ldr_ok == true ) {
       // --> Turn On Light
       analogWrite(ledpinbl, 255);
       digitalWrite(lightpin1, HIGH);

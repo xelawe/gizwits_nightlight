@@ -1,4 +1,4 @@
-#include "cy_mqtt.h"
+#include "cy_mqtt_v1.h"
 
 char *gv_power = "OFF";
 
@@ -29,20 +29,18 @@ void init_mqtt_local() {
   init_mqtt(gv_clientname);
 
   delay(500);
-  
+
   gv_power = "OFF";
   pub_power();
-  
+
   delay(500);
   check_mqtt_reset();
-  
+
   delay(500);
   pub_power();
-    check_mqtt_reset();
-  
+  check_mqtt_reset();
 
-  
+
+
   DebugPrintln("MQTT init done!");
 }
-
-
