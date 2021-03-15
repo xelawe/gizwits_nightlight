@@ -10,10 +10,13 @@ void set_rgb(int iv_red, int iv_green, int iv_blue) {
   analogWrite(ledpinbl, lv_blue);
 }
 
-void piroff()
-{
+void piroff() {
   gv_PIR_on = false;
   ticker_piroff.detach();
+}
+
+void ICACHE_RAM_ATTR tick_send_mqtt() {
+  gv_tick_send_mqtt = true;
 }
 
 void ICACHE_RAM_ATTR IntPIR() {
@@ -55,6 +58,7 @@ void setup() {
 
   pinMode(pirpin, INPUT);
   attachInterrupt(pirpin, IntPIR, RISING);
+  send_mqtt.attach(60, tick_send_mqtt);
 
   delay(500);
 
@@ -120,4 +124,9 @@ void loop() {
   }
 
   pub_power();
+  
+  if (gv_tick_send_mqtt) {
+    pub_sens();
+    gv_tick_send_mqtt = false;
+  }
 }
