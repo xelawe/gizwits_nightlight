@@ -1,0 +1,1 @@
+#define PWMRANGE 1023
